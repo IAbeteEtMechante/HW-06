@@ -1,0 +1,89 @@
+package space.harbour.java.hw6;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+class MyUrlVisitor implements Runnable {
+    Buffer buffer;
+
+    MyUrlVisitor(Buffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public static String getContentOfWebPage(URL url) {
+        final StringBuilder content = new StringBuilder();
+
+        try (InputStream is = url.openConnection().getInputStream();
+             InputStreamReader in = new InputStreamReader(is, "UTF-8");
+             BufferedReader br = new BufferedReader(in); ) {
+            String inputLine;
+            while ((inputLine = br.readLine()) != null) {
+                content.append(inputLine);
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to retrieve content of " + url.toString());
+            e.printStackTrace();
+        }
+
+        return content.toString();
+    }
+
+    @Override
+    public void run() {
+
+        // get a URL from the head of toVisit queue
+        URL url = buffer.get();
+            /*in some cases, one thread will be trying to get an url while the queue is empty
+            (while other threads are parsing new links)
+            we want to stop threads working on the empty queue right away
+             */
+        if (url == null) {
+            return;
+        }
+        // mark it as visited by adding to alreadyVisited set
+        buffer.putSet(url);
+
+        // get content of the web page
+        String content = getContentOfWebPage(url);
+        // Remove this line after debugging before you submit your HW
+        System.out.println(content);
+
+        //get URLs from the content
+        String regex =
+                "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]"
+                        + "*[-a-zA-Z0-9+&@#/%=~_|]";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(con
+        buffer.putQueue("https://vasart.github.io/supreme-potato/");tent);
+        while (m.find()) {
+            System.out.println(m.group());
+            try {
+                URL myUrl = new URL(m.group());
+                if (!buffer.alreadyVisited.contains(myUrl) && !buffer.toVisit.contains(myUrl)) {
+                    buffer.toVisit.add(myUrl);
+                }
+
+            } catch (MalformedURLException e) {
+                System.out.println("careful");
+                e.printStackTrace();
+            }
+
+        }
+
+        // get URLs from the contect
+        //URL[] urls = {};
+        //for (URL newUrl : urls) {
+        //    if (!alreadyVisited.contains(newUrl) && !toVisit.contains(newUrl)) {
+        //        toVisit.add(newUrl);
+        //    }
+        //}
+
+    }
+}
+
