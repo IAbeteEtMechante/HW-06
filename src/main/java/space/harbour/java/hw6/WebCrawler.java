@@ -15,13 +15,18 @@ public class WebCrawler {
         ExecutorService service = Executors.newFixedThreadPool(100);
 
         Future<CopyOnWriteArraySet> future;
+        CopyOnWriteArraySet<URL> mySet = new CopyOnWriteArraySet<URL>();
 
         //submit the tasks for execution
         //for (int i = 0; i < 1000; i++) {
         while (!buffer.toVisit.isEmpty()) {
             future = service.submit(new VisitorUrl(buffer));
-            System.out.println(future.get());
+            mySet = future.get();
         }
+        for (URL url : mySet) {
+            System.out.println(url.toString());
+        }
+
 
         service.shutdown();
     }
